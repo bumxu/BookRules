@@ -44,14 +44,12 @@ public class BookUtils {
      */
     public static boolean isBookRulesBook(ItemStack item) {
         if (item != null && item.getType().equals(Material.WRITTEN_BOOK)) {
-            if (item.getItemMeta().getLore() != null && item.getItemMeta().getLore().contains("BookRules")) {
-                try {
-                    AttributeWrapper wrapper = AttributeWrapper.newWrapper(item);
-                    UUID uuid = UUID.fromString(wrapper.getData());
-                    return true;
-                } catch (IllegalArgumentException e) {
-                    return false;
-                }
+            try {
+                AttributeWrapper wrapper = AttributeWrapper.newWrapper(item);
+                UUID uuid = UUID.fromString(wrapper.getData());
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
             }
         }
 

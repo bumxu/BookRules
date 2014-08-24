@@ -121,9 +121,6 @@ public class StoredBook {
         meta.setTitle(title);
         meta.setAuthor(author);
         meta.setPages(pages);
-        List<String> lore = new ArrayList<>();
-        lore.add("BookRules");
-        meta.setLore(lore);
         itemStack.setItemMeta(meta);
         AttributeWrapper wrapper = AttributeWrapper.newWrapper(itemStack);
         wrapper.setData(uuid.toString());
