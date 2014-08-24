@@ -25,6 +25,8 @@ package com.mstiles92.plugins.bookrules;
 
 import com.mstiles92.plugins.bookrules.commands.BookRulesCommands;
 import com.mstiles92.plugins.bookrules.config.Config;
+import com.mstiles92.plugins.bookrules.data.StoredBooks;
+import com.mstiles92.plugins.bookrules.listeners.MenuListener;
 import com.mstiles92.plugins.bookrules.listeners.PlayerListener;
 import com.mstiles92.plugins.bookrules.localization.Language;
 import com.mstiles92.plugins.bookrules.localization.Localization;
@@ -37,6 +39,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -60,6 +63,8 @@ public class BookRules extends JavaPlugin {
         Config.loadFromConfig(getConfig());
         saveConfig();
 
+        StoredBooks.init(new File(getDataFolder(), "books.json"));
+
         if (!Localization.load(Language.fromAbbreviation(Config.getLanguage()))) {
             Log.warning("Error loading language file. BookRules will now be disabled.");
             getPluginLoader().disablePlugin(this);
@@ -72,6 +77,7 @@ public class BookRules extends JavaPlugin {
         commandRegistry.registerHelp();
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        getServer().getPluginManager().registerEvents(new MenuListener(), this);
 
         if (Config.shouldCheckForUpdates()) {
             updateChecker = new UpdateChecker(this, 44081, "bookrules", 216000);
@@ -93,9 +99,18 @@ public class BookRules extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (updateChecker != null) {
+            updateChecker.stop();
+        }
 
+        StoredBooks.save();
     }
 
+    /**
+     * Get the instance of the update checker class.
+     *
+     * @return the instance of the update checker class being used, or null if update checking is disabled
+     */
     public UpdateChecker getUpdateChecker() {
         return updateChecker;
     }

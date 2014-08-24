@@ -25,9 +25,13 @@ package com.mstiles92.plugins.bookrules.commands;
 
 import com.mstiles92.plugins.bookrules.BookRules;
 import com.mstiles92.plugins.bookrules.config.Config;
+import com.mstiles92.plugins.bookrules.data.StoredBook;
+import com.mstiles92.plugins.bookrules.data.StoredBooks;
 import com.mstiles92.plugins.bookrules.localization.Localization;
 import com.mstiles92.plugins.bookrules.localization.Strings;
-import com.mstiles92.plugins.bookrules.util.BookStorage;
+import com.mstiles92.plugins.bookrules.menu.MenuProvider;
+import com.mstiles92.plugins.bookrules.menu.MenuType;
+import com.mstiles92.plugins.bookrules.util.BookUtils;
 import com.mstiles92.plugins.commonutils.commands.Arguments;
 import com.mstiles92.plugins.commonutils.commands.CommandHandler;
 import com.mstiles92.plugins.commonutils.commands.annotations.Command;
@@ -143,7 +147,7 @@ public class BookRulesCommands implements CommandHandler {
     @Command(name = "bookrules.reload", aliases = {"rulebook.reload", "rb.reload", "br.reload"}, permission = "bookrules.reload")
     public void reload(Arguments args) {
         Config.loadFromConfig(BookRules.getInstance().getConfig());
-        BookStorage.getInstance().loadFromFile();
+        StoredBooks.reload();
         args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.CONFIG_RELOADED));
     }
 
@@ -155,26 +159,27 @@ public class BookRulesCommands implements CommandHandler {
     @Command(name = "bookrules.get", aliases = {"rulebook.get", "rb.get", "br.get"}, permission = "bookrules.get", playerOnly = true)
     public void get(Arguments args) {
         if (args.getArgs().length == 0) {
-            int booksGiven = BookStorage.getInstance().givePlayerAllBooks(args.getPlayer());
-            if (booksGiven > 0) {
-                args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.ALL_BOOKS_RECIEVED));
+            if (BookUtils.givePlayerAllBooks(args.getPlayer()) > 0) {
+                args.getPlayer().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.ALL_BOOKS_RECIEVED));
             } else {
-                args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.NO_BOOKS_REGISTERED));
+                args.getPlayer().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.NO_BOOKS_REGISTERED));
             }
         } else {
             String query = (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0];
+            StoredBook book = StoredBooks.findBook(query);
 
-            if (BookStorage.getInstance().givePlayerBook(args.getPlayer(), query)) {
-                args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_RECIEVED));
-            } else {
+            if (book == null) {
                 args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.BOOK_NOT_FOUND));
+            } else {
+                book.giveToPlayer(args.getPlayer());
+                args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_RECIEVED));
             }
         }
     }
 
     @TabCompleter(name = "bookrules.get", aliases = {"rulebook.get", "rb.get", "br.get"})
     public List<String> completeGet(Arguments args) {
-        return autocomplete(BookStorage.getInstance().getAllBookTitles(), (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ") : args.getArgs()[0]);
+        return autocomplete(StoredBooks.getAllBookTitles(), (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ") : args.getArgs()[0]);
     }
 
     @Command(name = "bookrules.give", aliases = {"rulebook.give", "rb.give", "br.give"}, permission = "bookrules.give")
@@ -192,9 +197,7 @@ public class BookRulesCommands implements CommandHandler {
         }
 
         if (args.getArgs().length == 1) {
-            int booksGiven = BookStorage.getInstance().givePlayerAllBooks(player);
-
-            if (booksGiven > 0) {
+            if (BookUtils.givePlayerAllBooks(player) > 0) {
                 args.getSender().sendMessage(String.format(Strings.PLUGIN_TAG + Localization.getString(Strings.ALL_BOOKS_GIVEN), player.getName()));
                 player.sendMessage(String.format(Strings.PLUGIN_TAG + Localization.getString(Strings.GIVEN_ALL_BOOKS_MESSAGE), args.getSender().getName()));
             } else {
@@ -202,12 +205,14 @@ public class BookRulesCommands implements CommandHandler {
             }
         } else {
             String query = (args.getArgs().length > 2) ? StringUtils.join(args.getArgs(), " ", 1, args.getArgs().length) : args.getArgs()[1];
+            StoredBook book = StoredBooks.findBook(query);
 
-            if (BookStorage.getInstance().givePlayerBook(player, query)) {
+            if (book == null) {
+                args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.BOOK_NOT_FOUND));
+            } else {
+                book.giveToPlayer(player);
                 args.getSender().sendMessage(String.format(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_GIVEN), player.getName()));
                 player.sendMessage(String.format(Strings.PLUGIN_TAG + Localization.getString(Strings.GIVEN_BOOK_MESSAGE), args.getSender().getName()));
-            } else {
-                args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.BOOK_NOT_FOUND));
             }
         }
     }
@@ -215,10 +220,15 @@ public class BookRulesCommands implements CommandHandler {
     @TabCompleter(name = "bookrules.give", aliases = {"rulebook.give", "rb.give", "br.give"})
     public List<String> completeGive(Arguments args) {
         if (args.getArgs().length > 1) {
-            return autocomplete(BookStorage.getInstance().getAllBookTitles(), StringUtils.join(args.getArgs(), " ", 1, args.getArgs().length - 1));
+            return autocomplete(StoredBooks.getAllBookTitles(), StringUtils.join(args.getArgs(), " ", 1, args.getArgs().length - 1));
         } else {
             return empty;
         }
+    }
+
+    @Command(name = "bookrules.menu", aliases = {"rulebook.menu", "rb.menu", "br.menu"}, permission = "bookrules.menu", playerOnly = true)
+    public void menu(Arguments args) {
+        MenuProvider.getNewMenuHandler(MenuType.MAIN).openMenu(args.getPlayer());
     }
 
     @Command(name = "bookrules.add", aliases = {"rulebook.add", "rb.add", "br.add"}, permission = "bookrules.add", playerOnly = true)
@@ -229,7 +239,8 @@ public class BookRulesCommands implements CommandHandler {
         if (heldItem.getType() != Material.WRITTEN_BOOK) {
             player.sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.MUST_HOLD_BOOK));
         } else {
-            BookStorage.getInstance().addBook(heldItem);
+            //TODO: show menu to configure options for this book before adding it to the plugin
+            StoredBooks.add(heldItem);
             player.sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_ADDED));
         }
     }
@@ -242,32 +253,38 @@ public class BookRulesCommands implements CommandHandler {
     @Command(name = "bookrules.delete", aliases = {"rulebook.delete", "rb.delete", "br.delete"}, permission = "bookrules.delete")
     public void delete(Arguments args) {
         if (args.getArgs().length == 0) {
+            //TODO: show GUI menu to delete books (with confirmation)
             args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.NO_BOOK_SPECIFIED));
             return;
         }
 
-        if (BookStorage.getInstance().deleteBook((args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0])) {
-            args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_DELETED));
-        } else {
+        StoredBook bookToDelete = StoredBooks.findBook((args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0]);
+
+        if (bookToDelete == null) {
             args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.BOOK_NOT_FOUND));
+        } else {
+            StoredBooks.delete(bookToDelete);
+            args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_DELETED));
         }
     }
 
     @TabCompleter(name = "bookrules.delete", aliases = {"rulebook.delete", "rb.delete", "br.delete"})
     public List<String> completeDelete(Arguments args) {
-        return autocomplete(BookStorage.getInstance().getAllBookTitles(), (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ") : args.getArgs()[0]);
+        return autocomplete(StoredBooks.getAllBookTitles(), (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ") : args.getArgs()[0]);
     }
 
     @Command(name = "bookrules.list", aliases = {"rulebook.list", "rb.list", "br.list"}, permission = "bookrules.list")
     public void list(Arguments args) {
-        List<String> books = BookStorage.getInstance().createBookList();
+        List<StoredBook> allBooks = StoredBooks.getStoredBooks();
 
-        if (books.isEmpty()) {
+        if (allBooks.isEmpty()) {
             args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.NO_BOOKS_REGISTERED));
         } else {
             args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.LIST_CMD_HEADER));
-            for (String line : books) {
-                args.getSender().sendMessage(Strings.PLUGIN_TAG + line);
+
+            //TODO: filter out books that the player does not have permission for
+            for (int i = 0; i < allBooks.size(); i++) {
+                args.getSender().sendMessage(Strings.PLUGIN_TAG + (i + 1) + " - " + allBooks.get(i).getTitle() + " by " + allBooks.get(i).getAuthor());
             }
         }
     }
@@ -292,7 +309,7 @@ public class BookRulesCommands implements CommandHandler {
             return;
         }
 
-        book = BookStorage.setAuthor(book, (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0]);
+        book = BookUtils.setAuthor(book, (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0]);
 
         player.setItemInHand(book);
         player.sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.AUTHOR_CHANGED));
@@ -319,7 +336,7 @@ public class BookRulesCommands implements CommandHandler {
             return;
         }
 
-        book = BookStorage.setTitle(book, (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0]);
+        book = BookUtils.setTitle(book, (args.getArgs().length > 1) ? StringUtils.join(args.getArgs(), " ", 0, args.getArgs().length) : args.getArgs()[0]);
 
         player.setItemInHand(book);
         player.sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.TITLE_CHANGED));
@@ -340,7 +357,7 @@ public class BookRulesCommands implements CommandHandler {
             return;
         }
 
-        book = BookStorage.unsignBook(book);
+        book = BookUtils.unsignBook(book);
         player.setItemInHand(book);
         player.sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.BOOK_UNSIGNED));
     }
