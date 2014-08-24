@@ -29,6 +29,7 @@ import com.mstiles92.plugins.bookrules.data.StoredBooks;
 import com.mstiles92.plugins.bookrules.menu.IMenuHandler;
 import com.mstiles92.plugins.bookrules.menu.MenuType;
 import com.mstiles92.plugins.bookrules.util.AttributeWrapper;
+import com.mstiles92.plugins.bookrules.util.BookUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -51,8 +52,7 @@ public class MainMenuHandler implements IMenuHandler {
 
     @Override
     public void openMenu(Player player) {
-        //List<StoredBook> books = BookStorage.getInstance().getAllStoredBooks();
-        List<StoredBook> books = StoredBooks.getStoredBooks();
+        List<StoredBook> books = BookUtils.filterListByPermission(StoredBooks.getStoredBooks(), player);
         int numRows = (books.size() == 0) ? 0 : (books.size() / 9) + 1;
         if (player.hasPermission("bookrules.admin")) {
             numRows += 1;
@@ -61,7 +61,6 @@ public class MainMenuHandler implements IMenuHandler {
 
         Inventory inv = Bukkit.createInventory(player, numRows * 9, "BookRules Main Menu");
         for (StoredBook i : books) {
-            //TODO: check for group-specific books
             inv.addItem(i.getItemStack());
         }
 

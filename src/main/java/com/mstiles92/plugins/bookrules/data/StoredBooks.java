@@ -23,7 +23,6 @@
 
 package com.mstiles92.plugins.bookrules.data;
 
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
@@ -139,25 +138,6 @@ public class StoredBooks {
         }
 
         return null;
-    }
-
-    /**
-     * Get a list of books that the given player has not yet received.
-     *
-     * @param player which player the list of ungiven books should be generated for
-     * @return the list of books not yet received by the player
-     */
-    public static List<StoredBook> getUngivenBooks(Player player) {
-        List<StoredBook> books = new ArrayList<>();
-        PlayerData playerData = PlayerData.get(player);
-
-        for (StoredBook b : storedBooks) {
-            if (!playerData.getReceivedBooks().contains(b.getUUID())) {
-                books.add(b);
-            }
-        }
-
-        return books;
     }
 
     /**

@@ -23,6 +23,7 @@
 
 package com.mstiles92.plugins.bookrules.util;
 
+import com.mstiles92.plugins.bookrules.data.PlayerData;
 import com.mstiles92.plugins.bookrules.data.StoredBook;
 import com.mstiles92.plugins.bookrules.data.StoredBooks;
 import org.bukkit.Material;
@@ -30,6 +31,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class BookUtils {
@@ -111,9 +114,8 @@ public class BookUtils {
 
         for (StoredBook book : StoredBooks.getStoredBooks()) {
             if (book.checkPermission(player)) {
-                count += 1;
-
                 book.giveToPlayer(player);
+                count += 1;
             }
         }
 
@@ -127,7 +129,34 @@ public class BookUtils {
      * @return the number of books given to the player
      */
     public static int givePlayerAllUngivenBooks(Player player) {
-        //TODO: implement
-        return -1;
+        int count = 0;
+
+        for (StoredBook book : StoredBooks.getStoredBooks()) {
+            if (book.checkPermission(player) && !PlayerData.get(player).getReceivedBooks().contains(book.getUUID())) {
+                book.giveToPlayer(player);
+                count += 1;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Filter a list of StoredBook objects to only include books that the given player has permission to see.
+     *
+     * @param fullList the list to filter books out of
+     * @param player the player whose permissions will be checked
+     * @return the filtered list of only books the player has permission to see
+     */
+    public static List<StoredBook> filterListByPermission(List<StoredBook> fullList, Player player) {
+        List<StoredBook> filteredList = new ArrayList<>();
+
+        for (StoredBook book : fullList) {
+            if (book.checkPermission(player)) {
+                filteredList.add(book);
+            }
+        }
+
+        return filteredList;
     }
 }
