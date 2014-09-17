@@ -146,7 +146,7 @@ public class BookRulesCommands implements CommandHandler {
 
     @Command(name = "bookrules.reload", aliases = {"rulebook.reload", "rb.reload", "br.reload"}, permission = "bookrules.reload")
     public void reload(Arguments args) {
-        Config.loadFromConfig(BookRules.getInstance().getConfig());
+        Config.load(BookRules.getInstance().getConfig());
         StoredBooks.reload();
         args.getSender().sendMessage(Strings.PLUGIN_TAG + Localization.getString(Strings.CONFIG_RELOADED));
     }

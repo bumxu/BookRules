@@ -43,9 +43,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * BookRules is the main class of this Bukkit plugin. It handles enabling
- * and disabling of this plugin, loading config files, and other general
- * methods needed for this plugin's operation.
+ * BookRules is the main class of this Bukkit plugin. It handles enabling and disabling of this plugin, loading config
+ * files, initializing the localization system, registering commands and events, and starting the update checker and
+ * metrics reporting, if enabled.
  *
  * @author mstiles92
  */
@@ -60,8 +60,7 @@ public class BookRules extends JavaPlugin {
         instance = this;
 
         saveDefaultConfig();
-        Config.loadFromConfig(getConfig());
-        saveConfig();
+        Config.load(getConfig());
 
         StoredBooks.init(new File(getDataFolder(), "books.json"));
 
@@ -93,17 +92,18 @@ public class BookRules extends JavaPlugin {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return commandRegistry.handleCommand(sender, command, label, args);
-    }
-
-    @Override
     public void onDisable() {
         if (updateChecker != null) {
             updateChecker.stop();
         }
 
+        saveConfig();
         StoredBooks.save();
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        return commandRegistry.handleCommand(sender, command, label, args);
     }
 
     /**
