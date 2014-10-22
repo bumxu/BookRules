@@ -112,7 +112,7 @@ public class StoredBook {
      * @return true if the player is allowed to see the book, false if they are not
      */
     public boolean checkPermission(Player player) {
-        return (playerGroup == null) ? true : player.hasPermission("bookrules.group." + playerGroup);
+        return (playerGroup == null || playerGroup.equals("")) ? true : player.hasPermission("bookrules.group." + playerGroup);
     }
 
     public ItemStack getItemStack() {
