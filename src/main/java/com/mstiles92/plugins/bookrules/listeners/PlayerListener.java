@@ -30,7 +30,7 @@ import com.mstiles92.plugins.bookrules.localization.Localization;
 import com.mstiles92.plugins.bookrules.localization.Strings;
 import com.mstiles92.plugins.bookrules.util.BookUtils;
 import com.mstiles92.plugins.bookrules.util.GiveBookRunnable;
-import com.mstiles92.plugins.commonutils.updates.UpdateChecker;
+import com.mstiles92.plugins.stileslib.updates.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

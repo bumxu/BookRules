@@ -23,7 +23,6 @@
 
 package com.mstiles92.plugins.bookrules.data;
 
-import com.mstiles92.plugins.bookrules.menu.MenuType;
 import org.bukkit.entity.Player;
 
 import javax.json.*;
@@ -34,7 +33,6 @@ public class PlayerData {
 
     private List<UUID> receivedBooks;
     private String lastSeenName;
-    private MenuType currentMenuType;
 
     private PlayerData(JsonObject json) {
         receivedBooks = new ArrayList<>();
@@ -43,13 +41,11 @@ public class PlayerData {
             receivedBooks.add(UUID.fromString(id.getString()));
         }
         lastSeenName = json.getString("lastSeenName");
-        currentMenuType = MenuType.NONE;
     }
 
     private PlayerData(Player player) {
         receivedBooks = new ArrayList<>();
         lastSeenName = player.getName();
-        currentMenuType = MenuType.NONE;
     }
 
     private JsonObject toJsonObject() {
@@ -87,15 +83,6 @@ public class PlayerData {
 
     public static PlayerData get(Player player) {
         return instances.containsKey(player.getUniqueId()) ? instances.get(player.getUniqueId()) : create(player);
-    }
-
-
-    public MenuType getCurrentMenuType() {
-        return currentMenuType;
-    }
-
-    public void setCurrentMenuType(MenuType menuType) {
-        currentMenuType = menuType;
     }
 
     public List<UUID> getReceivedBooks() {

@@ -26,14 +26,14 @@ package com.mstiles92.plugins.bookrules;
 import com.mstiles92.plugins.bookrules.commands.BookRulesCommands;
 import com.mstiles92.plugins.bookrules.config.Config;
 import com.mstiles92.plugins.bookrules.data.StoredBooks;
-import com.mstiles92.plugins.bookrules.listeners.MenuListener;
 import com.mstiles92.plugins.bookrules.listeners.PlayerListener;
 import com.mstiles92.plugins.bookrules.localization.Language;
 import com.mstiles92.plugins.bookrules.localization.Localization;
 import com.mstiles92.plugins.bookrules.localization.Strings;
 import com.mstiles92.plugins.bookrules.util.Log;
-import com.mstiles92.plugins.commonutils.commands.CommandRegistry;
-import com.mstiles92.plugins.commonutils.updates.UpdateChecker;
+import com.mstiles92.plugins.stileslib.commands.CommandRegistry;
+import com.mstiles92.plugins.stileslib.menu.MenuListener;
+import com.mstiles92.plugins.stileslib.updates.UpdateChecker;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -76,7 +76,7 @@ public class BookRules extends JavaPlugin {
         commandRegistry.registerHelp();
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-        getServer().getPluginManager().registerEvents(new MenuListener(), this);
+        MenuListener.getInstance().register(this);
 
         if (Config.shouldCheckForUpdates()) {
             updateChecker = new UpdateChecker(this, 44081, "bookrules", 216000);
