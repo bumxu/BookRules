@@ -31,11 +31,11 @@ import java.util.*;
 public class PlayerData {
     private static Map<UUID, PlayerData> instances = new HashMap<>();
 
-    private List<UUID> receivedBooks;
+    private Set<UUID> receivedBooks;
     private String lastSeenName;
 
     private PlayerData(JsonObject json) {
-        receivedBooks = new ArrayList<>();
+        receivedBooks = new HashSet<>();
         JsonArray receivedJson = json.getJsonArray("receivedBooks");
         for (JsonString id : receivedJson.getValuesAs(JsonString.class)) {
             receivedBooks.add(UUID.fromString(id.getString()));
@@ -44,7 +44,7 @@ public class PlayerData {
     }
 
     private PlayerData(Player player) {
-        receivedBooks = new ArrayList<>();
+        receivedBooks = new HashSet<>();
         lastSeenName = player.getName();
     }
 
@@ -85,7 +85,11 @@ public class PlayerData {
         return instances.containsKey(player.getUniqueId()) ? instances.get(player.getUniqueId()) : create(player);
     }
 
-    public List<UUID> getReceivedBooks() {
+    public Set<UUID> getReceivedBooks() {
         return receivedBooks;
+    }
+
+    public void markBookRecieved(UUID bookUUID) {
+        receivedBooks.add(bookUUID);
     }
 }

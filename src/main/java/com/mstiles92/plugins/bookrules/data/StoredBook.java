@@ -134,6 +134,8 @@ public class StoredBook {
         for (Map.Entry<Integer, ItemStack> entry : leftovers.entrySet()) {
             player.getWorld().dropItem(player.getLocation(), entry.getValue());
         }
+
+        PlayerData.get(player).markBookRecieved(uuid);
     }
 
     public UUID getUUID() {
