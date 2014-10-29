@@ -29,6 +29,7 @@ import com.mstiles92.plugins.bookrules.data.StoredBook;
 import com.mstiles92.plugins.bookrules.data.StoredBooks;
 import com.mstiles92.plugins.bookrules.localization.Localization;
 import com.mstiles92.plugins.bookrules.localization.Strings;
+import com.mstiles92.plugins.bookrules.menu.menus.DeleteMenu;
 import com.mstiles92.plugins.bookrules.menu.menus.MainMenu;
 import com.mstiles92.plugins.bookrules.util.BookUtils;
 import com.mstiles92.plugins.stileslib.commands.Arguments;
@@ -42,7 +43,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -253,8 +253,11 @@ public class BookRulesCommands implements CommandHandler {
     @Command(name = "bookrules.delete", aliases = {"rulebook.delete", "rb.delete", "br.delete"}, permission = "bookrules.delete")
     public void delete(Arguments args) {
         if (args.getArgs().length == 0) {
-            //TODO: show GUI menu to delete books (with confirmation)
-            args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.NO_BOOK_SPECIFIED));
+            if (args.isPlayer()) {
+                new DeleteMenu(args.getPlayer()).open();
+            } else {
+                args.getSender().sendMessage(Strings.PLUGIN_TAG + ChatColor.RED + Localization.getString(Strings.NO_BOOK_SPECIFIED));
+            }
             return;
         }
 

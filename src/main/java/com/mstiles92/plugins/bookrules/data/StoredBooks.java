@@ -199,4 +199,18 @@ public class StoredBooks {
     public static void delete(StoredBook book) {
         storedBooks.remove(book);
     }
+
+    /**
+     * Remove a StoredBook from the plugin.
+     *
+     * @param bookUUID the UUID of the stored book to delete
+     */
+    public static void delete(UUID bookUUID) {
+        for (StoredBook book : storedBooks) {
+            if (book.getUUID().equals(bookUUID)) {
+                storedBooks.remove(book);
+                return;
+            }
+        }
+    }
 }

@@ -24,27 +24,18 @@
 package com.mstiles92.plugins.bookrules.menu.items;
 
 import com.mstiles92.plugins.bookrules.data.StoredBook;
+import com.mstiles92.plugins.bookrules.data.StoredBooks;
 import com.mstiles92.plugins.stileslib.menu.events.MenuClickEvent;
-import com.mstiles92.plugins.stileslib.menu.items.MenuItem;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.UUID;
-
-public class BookMenuItem extends MenuItem {
-    private UUID bookUUID;
-
-    public BookMenuItem(StoredBook book) {
-        super(new ItemStack(Material.WRITTEN_BOOK), book.getTitle(), "by: " + book.getAuthor()); //TODO: refactor into localization system
-        bookUUID = book.getUUID();
+public class DeleteBookMenuItem extends BookMenuItem {
+    public DeleteBookMenuItem(StoredBook book) {
+        super(book);
     }
 
     @Override
     public void onClick(MenuClickEvent event) {
-        event.getPlayer().sendMessage(bookUUID.toString());
-    }
-
-    public UUID getBookUUID() {
-        return bookUUID;
+        StoredBooks.delete(getBookUUID());
+        event.getPlayer().sendMessage("Book deleted!"); //TODO: refactor into localization system
+        event.setResult(MenuClickEvent.Result.CLOSE);
     }
 }
