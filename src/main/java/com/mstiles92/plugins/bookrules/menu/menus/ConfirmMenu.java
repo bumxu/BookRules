@@ -39,6 +39,7 @@ public abstract class ConfirmMenu extends Menu {
         setItem(2, new MenuItem(new Wool(DyeColor.RED).toItemStack(), "No", "Cancel") {
             @Override
             public void onClick(MenuClickEvent event) {
+                onCancel();
                 event.setResult(MenuClickEvent.Result.PREVIOUS);
             }
         });
