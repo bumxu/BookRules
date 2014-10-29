@@ -25,6 +25,7 @@ package com.mstiles92.plugins.bookrules.menu.items;
 
 import com.mstiles92.plugins.bookrules.data.StoredBook;
 import com.mstiles92.plugins.bookrules.data.StoredBooks;
+import com.mstiles92.plugins.bookrules.menu.menus.ConfirmMenu;
 import com.mstiles92.plugins.stileslib.menu.events.MenuClickEvent;
 
 public class DeleteBookMenuItem extends BookMenuItem {
@@ -33,9 +34,18 @@ public class DeleteBookMenuItem extends BookMenuItem {
     }
 
     @Override
-    public void onClick(MenuClickEvent event) {
-        StoredBooks.delete(getBookUUID());
-        event.getPlayer().sendMessage("Book deleted!"); //TODO: refactor into localization system
-        event.setResult(MenuClickEvent.Result.CLOSE);
+    public void onClick(final MenuClickEvent event) {
+        new ConfirmMenu(event.getMenu()) {
+            @Override
+            public void onSubmit() {
+                StoredBooks.delete(getBookUUID());
+                event.getPlayer().sendMessage("Book deleted!"); //TODO: refactor into localization system
+            }
+
+            @Override
+            public void onCancel() {
+                event.setResult(MenuClickEvent.Result.REFRESH);
+            }
+        }.open(event.getPlayer());
     }
 }
