@@ -228,7 +228,7 @@ public class BookRulesCommands implements CommandHandler {
 
     @Command(name = "bookrules.menu", aliases = {"rulebook.menu", "rb.menu", "br.menu"}, permission = "bookrules.menu", playerOnly = true)
     public void menu(Arguments args) {
-        new MainMenu().open(args.getPlayer());
+        new MainMenu(args.getPlayer()).open();
     }
 
     @Command(name = "bookrules.add", aliases = {"rulebook.add", "rb.add", "br.add"}, permission = "bookrules.add", playerOnly = true)
