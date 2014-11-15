@@ -50,7 +50,10 @@ public class GiveBookRunnable implements Runnable {
     public void run() {
         if (Config.shouldGiveBooksEveryJoin()) {
             int num = BookUtils.givePlayerAllBooks(player);
-            player.sendMessage(String.format(Strings.PLUGIN_TAG + Localization.getString(Strings.PLAYER_JOIN_MESSAGE), String.valueOf(num)));
+
+            if (Config.shouldNotifyPlayers()) {
+                player.sendMessage(String.format(Strings.PLUGIN_TAG + Localization.getString(Strings.PLAYER_JOIN_MESSAGE), String.valueOf(num)));
+            }
         } else {
             int num = BookUtils.givePlayerAllUngivenBooks(player);
             Log.verbose(String.format(Localization.getString(Strings.PLAYER_GIVEN_BOOKS), player.getName(), String.valueOf(num)));
